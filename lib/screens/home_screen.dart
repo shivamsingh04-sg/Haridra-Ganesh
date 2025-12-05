@@ -180,8 +180,9 @@ class _HomeScreenState extends State<HomeScreen>
         },
         icon: const Icon(Icons.arrow_upward, size: 20),
         label: Text(
-          'ऊपर',
+          'Top',
           style: TextStyle(
+            color: Colors.white,
             fontSize: isMobile ? 13 : 14,
             fontWeight: FontWeight.w600,
             fontFamily: 'NotoSansDevanagari',

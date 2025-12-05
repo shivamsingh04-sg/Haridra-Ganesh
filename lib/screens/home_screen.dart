@@ -84,6 +84,7 @@ class _HomeScreenState extends State<HomeScreen>
           // Main Scrollable Content
           CustomScrollView(
             controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               // Hero Section
               SliverToBoxAdapter(

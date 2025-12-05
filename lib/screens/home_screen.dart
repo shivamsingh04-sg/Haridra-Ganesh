@@ -47,16 +47,12 @@ class _HomeScreenState extends State<HomeScreen>
 
     // Show/Hide AppBar based on scroll direction
     if (currentOffset > 100) {
-      // Only hide after scrolling past 100px
       if (currentOffset > _lastScrollOffset && _showAppBar) {
-        // Scrolling down - hide app bar
         setState(() => _showAppBar = false);
       } else if (currentOffset < _lastScrollOffset && !_showAppBar) {
-        // Scrolling up - show app bar
         setState(() => _showAppBar = true);
       }
     } else {
-      // Always show app bar at the top
       if (!_showAppBar) {
         setState(() => _showAppBar = true);
       }
@@ -74,10 +70,13 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width <= 900;
+    final size = MediaQuery.of(context).size;
+    final isMobile = size.width <= 600;
+    final isTablet = size.width > 600 && size.width <= 900;
+    final isDesktop = size.width > 900;
 
     return Scaffold(
-      endDrawer: isMobile ? const CustomDrawer(currentRoute: '/') : null,
+      endDrawer: !isDesktop ? const CustomDrawer(currentRoute: '/') : null,
       body: Stack(
         children: [
           const FlowerFallAnimation(),
@@ -101,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen>
 
               // Welcome Message
               SliverToBoxAdapter(
-                child: _buildWelcomeSection(),
+                child: _buildWelcomeSection(isMobile, isTablet),
               ),
 
               // 3D Temple View
@@ -123,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen>
 
               // Temple Timings
               SliverToBoxAdapter(
-                child: _buildTimingsSection(),
+                child: _buildTimingsSection(isMobile, isTablet),
               ),
 
               // Footer
@@ -152,32 +151,63 @@ class _HomeScreenState extends State<HomeScreen>
       ),
       floatingActionButton: _showFloatingButton
           ? FadeInUp(
-              child: FloatingActionButton.extended(
-                onPressed: () {
-                  _scrollController.animateTo(
-                    0,
-                    duration: const Duration(milliseconds: 500),
-                    curve: Curves.easeInOut,
-                  );
-                },
-                icon: const Icon(Icons.arrow_upward),
-                label: const Text('Top'),
-                backgroundColor: const Color(0xFFFF6B35),
-              ),
+              child: _buildFloatingActionButton(isMobile),
             )
           : null,
     );
   }
 
-  Widget _buildWelcomeSection() {
+  Widget _buildFloatingActionButton(bool isMobile) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(isMobile ? 28 : 50),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFFF9933).withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: FloatingActionButton.extended(
+        onPressed: () {
+          _scrollController.animateTo(
+            0,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+        },
+        icon: const Icon(Icons.arrow_upward, size: 20),
+        label: Text(
+          'ऊपर',
+          style: TextStyle(
+            fontSize: isMobile ? 13 : 14,
+            fontWeight: FontWeight.w600,
+            fontFamily: 'NotoSansDevanagari',
+          ),
+        ),
+        backgroundColor: const Color(0xFFFF9933),
+        elevation: 0,
+      ),
+    );
+  }
+
+  Widget _buildWelcomeSection(bool isMobile, bool isTablet) {
+    final horizontalPadding = isMobile ? 16.0 : (isTablet ? 32.0 : 48.0);
+    final verticalPadding = isMobile ? 40.0 : (isTablet ? 50.0 : 60.0);
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        vertical: verticalPadding,
+        horizontal: horizontalPadding,
+      ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Colors.orange.shade50,
+            const Color(0xFFFFF8F0),
+            const Color(0xFFFFF5E6),
             Colors.white,
           ],
         ),
@@ -185,29 +215,47 @@ class _HomeScreenState extends State<HomeScreen>
       child: FadeInDown(
         child: Column(
           children: [
-            // Animated Om Symbol
-            RotationTransition(
-              turns: _controller,
-              child: const Text(
-                'ॐ',
-                style: TextStyle(
-                  fontSize: 60,
-                  color: Color(0xFFFF6B35),
-                  fontWeight: FontWeight.bold,
+            // Animated Swastik Symbol
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFFF9933).withOpacity(0.2),
+                    blurRadius: 20,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: RotationTransition(
+                turns: _controller,
+                child: Text(
+                  '卐',
+                  style: TextStyle(
+                    fontSize: isMobile ? 48 : (isTablet ? 56 : 64),
+                    color: const Color(0xFFFF9933),
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        color: const Color(0xFFFF9933).withOpacity(0.3),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: isMobile ? 16 : 20),
 
             // Animated Welcome Text
             AnimatedTextKit(
               animatedTexts: [
                 TypewriterAnimatedText(
                   'स्वागत है',
-                  textStyle: const TextStyle(
-                    fontSize: 32,
+                  textStyle: TextStyle(
+                    fontSize: isMobile ? 24 : (isTablet ? 28 : 32),
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFFF6B35),
+                    color: const Color(0xFFFF9933),
                     fontFamily: 'NotoSansDevanagari',
                   ),
                   speed: const Duration(milliseconds: 200),
@@ -215,55 +263,60 @@ class _HomeScreenState extends State<HomeScreen>
               ],
               totalRepeatCount: 1,
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: isMobile ? 8 : 10),
 
-            const Text(
-              'Welcome to Haridra Ganesh Temple',
+            Text(
+              'हरिद्रा गणेश मंदिर में आपका स्वागत है',
               style: TextStyle(
-                fontSize: 28,
+                fontSize: isMobile ? 20 : (isTablet ? 24 : 28),
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF2C3E50),
+                color: const Color(0xFF8B4513),
+                letterSpacing: 0.5,
+                fontFamily: 'NotoSansDevanagari',
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: isMobile ? 16 : 20),
 
+            // Description
             Container(
-              constraints: const BoxConstraints(maxWidth: 800),
+              constraints: BoxConstraints(
+                maxWidth: isMobile ? double.infinity : (isTablet ? 600 : 800),
+              ),
               child: Text(
-                'Experience the divine presence of Lord Ganesh at one of Indore\'s most revered temples. '
-                'The Haridra Ganesh Temple is known for its unique turmeric-covered idol and spiritual ambiance.',
+                'इंदौर के सबसे प्रतिष्ठित मंदिरों में से एक, हरिद्रा गणेश मंदिर में भगवान गणेश की दिव्य उपस्थिति का अनुभव करें। '
+                'यह मंदिर अपनी अनोखी हल्दी से ढकी मूर्ति और आध्यात्मिक वातावरण के लिए जाना जाता है।',
                 style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[700],
-                  height: 1.6,
+                  fontSize: isMobile ? 14 : 16,
+                  color: const Color(0xFF6B5B4B),
+                  height: 1.8,
+                  letterSpacing: 0.3,
+                  fontFamily: 'NotoSansDevanagari',
                 ),
                 textAlign: TextAlign.center,
               ),
             ),
-            const SizedBox(height: 30),
+            SizedBox(height: isMobile ? 24 : 30),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            // Action Buttons
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: isMobile ? 12 : 20,
+              runSpacing: 12,
               children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/darshan');
-                  },
-                  icon: const Icon(Icons.video_call),
-                  label: const Text('Live Darshan'),
+                _buildActionButton(
+                  onPressed: () => Navigator.pushNamed(context, '/darshan'),
+                  icon: Icons.video_call,
+                  label: 'लाइव दर्शन',
+                  isPrimary: true,
+                  isMobile: isMobile,
                 ),
-                const SizedBox(width: 20),
-                OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/about');
-                  },
-                  icon: const Icon(Icons.info_outline),
-                  label: const Text('Learn More'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFFFF6B35),
-                    side: const BorderSide(color: Color(0xFFFF6B35)),
-                  ),
+                _buildActionButton(
+                  onPressed: () => Navigator.pushNamed(context, '/about'),
+                  icon: Icons.info_outline,
+                  label: 'और जानें',
+                  isPrimary: false,
+                  isMobile: isMobile,
                 ),
               ],
             ),
@@ -273,83 +326,261 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildTimingsSection() {
+  Widget _buildActionButton({
+    required VoidCallback onPressed,
+    required IconData icon,
+    required String label,
+    required bool isPrimary,
+    required bool isMobile,
+  }) {
+    final buttonStyle = isPrimary
+        ? ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFFF9933),
+            foregroundColor: Colors.white,
+            elevation: 0,
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 20 : 24,
+              vertical: isMobile ? 12 : 14,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          )
+        : OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFFFF9933),
+            side: const BorderSide(color: Color(0xFFFF9933), width: 2),
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 20 : 24,
+              vertical: isMobile ? 12 : 14,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          );
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: isPrimary
+            ? [
+                BoxShadow(
+                  color: const Color(0xFFFF9933).withOpacity(0.25),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
+      ),
+      child: isPrimary
+          ? ElevatedButton.icon(
+              onPressed: onPressed,
+              icon: Icon(icon, size: isMobile ? 18 : 20),
+              label: Text(
+                label,
+                style: TextStyle(
+                  fontSize: isMobile ? 14 : 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: buttonStyle,
+            )
+          : OutlinedButton.icon(
+              onPressed: onPressed,
+              icon: Icon(icon, size: isMobile ? 18 : 20),
+              label: Text(
+                label,
+                style: TextStyle(
+                  fontSize: isMobile ? 14 : 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: buttonStyle,
+            ),
+    );
+  }
+
+  Widget _buildTimingsSection(bool isMobile, bool isTablet) {
+    final horizontalMargin = isMobile ? 16.0 : (isTablet ? 32.0 : 48.0);
+    final verticalMargin = isMobile ? 32.0 : 40.0;
+    final containerPadding = isMobile ? 24.0 : (isTablet ? 32.0 : 40.0);
+
     return FadeInUp(
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
-        padding: const EdgeInsets.all(40),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.orange.shade400,
-              Colors.orange.shade600,
-            ],
-          ),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.orange.withOpacity(0.3),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
+        margin: EdgeInsets.symmetric(
+          vertical: verticalMargin,
+          horizontal: horizontalMargin,
         ),
-        child: Column(
-          children: [
-            const Text(
-              'Temple Timings',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+        constraints: const BoxConstraints(maxWidth: 1200),
+        child: Center(
+          child: Container(
+            padding: EdgeInsets.all(containerPadding),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFFF9933),
+                  Color(0xFFFFB84D),
+                ],
               ),
+              borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFFF9933).withOpacity(0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
-            const SizedBox(height: 30),
-            _buildTimingCard(
-                'Morning Aarti', '6:00 AM - 7:00 AM', Icons.wb_sunny),
-            const SizedBox(height: 15),
-            _buildTimingCard(
-                'Darshan Hours', '7:00 AM - 12:00 PM', Icons.temple_hindu),
-            const SizedBox(height: 15),
-            _buildTimingCard(
-                'Evening Darshan', '4:00 PM - 8:00 PM', Icons.nights_stay),
-            const SizedBox(height: 15),
-            _buildTimingCard(
-                'Evening Aarti', '7:00 PM - 8:00 PM', Icons.celebration),
-          ],
+            child: Column(
+              children: [
+                Text(
+                  'मंदिर का समय',
+                  style: TextStyle(
+                    fontSize: isMobile ? 24 : (isTablet ? 28 : 32),
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 0.5,
+                    fontFamily: 'NotoSansDevanagari',
+                  ),
+                ),
+                SizedBox(height: isMobile ? 20 : 30),
+
+                // Grid or Column layout based on screen size
+                isTablet || !isMobile
+                    ? _buildTimingsGrid(isMobile, isTablet)
+                    : _buildTimingsColumn(isMobile),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildTimingCard(String title, String time, IconData icon) {
+  Widget _buildTimingsGrid(bool isMobile, bool isTablet) {
+    return Wrap(
+      spacing: 16,
+      runSpacing: 16,
+      alignment: WrapAlignment.center,
+      children: [
+        _buildTimingCard(
+          'प्रातः आरती',
+          'सुबह 6:00 - 7:00',
+          Icons.wb_sunny,
+          isMobile,
+          isTablet,
+          flexibleWidth: true,
+        ),
+        _buildTimingCard(
+          'दर्शन समय',
+          'सुबह 7:00 - दोपहर 12:00',
+          Icons.temple_hindu,
+          isMobile,
+          isTablet,
+          flexibleWidth: true,
+        ),
+        _buildTimingCard(
+          'संध्या दर्शन',
+          'शाम 4:00 - 8:00',
+          Icons.nights_stay,
+          isMobile,
+          isTablet,
+          flexibleWidth: true,
+        ),
+        _buildTimingCard(
+          'संध्या आरती',
+          'शाम 7:00 - 8:00',
+          Icons.celebration,
+          isMobile,
+          isTablet,
+          flexibleWidth: true,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTimingsColumn(bool isMobile) {
+    return Column(
+      children: [
+        _buildTimingCard(
+            'प्रातः आरती', 'सुबह 6:00 - 7:00', Icons.wb_sunny, isMobile, false),
+        const SizedBox(height: 12),
+        _buildTimingCard('दर्शन समय', 'सुबह 7:00 - दोपहर 12:00',
+            Icons.temple_hindu, isMobile, false),
+        const SizedBox(height: 12),
+        _buildTimingCard('संध्या दर्शन', 'शाम 4:00 - 8:00', Icons.nights_stay,
+            isMobile, false),
+        const SizedBox(height: 12),
+        _buildTimingCard('संध्या आरती', 'शाम 7:00 - 8:00', Icons.celebration,
+            isMobile, false),
+      ],
+    );
+  }
+
+  Widget _buildTimingCard(
+    String title,
+    String time,
+    IconData icon,
+    bool isMobile,
+    bool isTablet, {
+    bool flexibleWidth = false,
+  }) {
+    final cardWidth =
+        flexibleWidth ? (isTablet ? 280.0 : 320.0) : double.infinity;
+
     return Container(
-      padding: const EdgeInsets.all(20),
+      width: flexibleWidth ? cardWidth : null,
+      padding: EdgeInsets.all(isMobile ? 16 : 20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
+        mainAxisSize: flexibleWidth ? MainAxisSize.min : MainAxisSize.max,
         children: [
-          Icon(icon, size: 32, color: const Color(0xFFFF6B35)),
-          const SizedBox(width: 20),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF5E6),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              icon,
+              size: isMobile ? 24 : 28,
+              color: const Color(0xFFFF9933),
+            ),
+          ),
+          SizedBox(width: isMobile ? 12 : 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontSize: 18,
+                  style: TextStyle(
+                    fontSize: isMobile ? 15 : 17,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF2C3E50),
+                    color: const Color(0xFF8B4513),
+                    letterSpacing: 0.3,
+                    fontFamily: 'NotoSansDevanagari',
                   ),
                 ),
+                const SizedBox(height: 4),
                 Text(
                   time,
                   style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
+                    fontSize: isMobile ? 13 : 14,
+                    color: const Color(0xFF6B5B4B),
+                    letterSpacing: 0.2,
+                    fontFamily: 'NotoSansDevanagari',
                   ),
                 ),
               ],

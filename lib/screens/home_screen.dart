@@ -178,7 +178,11 @@ class _HomeScreenState extends State<HomeScreen>
             curve: Curves.easeInOut,
           );
         },
-        icon: const Icon(Icons.arrow_upward, size: 20),
+        icon: const Icon(
+          Icons.arrow_upward,
+          size: 20,
+          color: Colors.white,
+        ),
         label: Text(
           'Top',
           style: TextStyle(

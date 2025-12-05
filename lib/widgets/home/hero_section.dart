@@ -51,15 +51,8 @@ class _HeroSectionState extends State<HeroSection>
     final isMobile = size.width <= 600;
     final isTablet = size.width > 600 && size.width <= 900;
 
-    // Use min height instead of fixed height for better mobile experience
-    final minHeight = isMobile
-        ? size.height * 0.85 // 85% on mobile to hint at content below
-        : (isTablet ? size.height * 0.9 : size.height);
-
     return Container(
-      constraints: BoxConstraints(
-        minHeight: minHeight,
-      ),
+      height: size.height,
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -83,192 +76,196 @@ class _HeroSectionState extends State<HeroSection>
             ),
           ),
 
-          // Main Content - Centered with proper padding
-          SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: isMobile ? 16 : (isTablet ? 32 : 48),
-                vertical: isMobile ? 40 : (isTablet ? 60 : 80),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Floating Swastik Symbol
-                  AnimatedBuilder(
-                    animation: _floatAnimation,
-                    builder: (context, child) {
-                      return Transform.translate(
-                        offset: Offset(0, _floatAnimation.value),
-                        child: child,
-                      );
-                    },
-                    child: AnimatedBuilder(
-                      animation: _glowAnimation,
+          // Main Content - Perfectly Centered
+          Center(
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 20 : (isTablet ? 40 : 60),
+                  vertical: isMobile ? 24 : 40,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Floating Swastik Symbol
+                    AnimatedBuilder(
+                      animation: _floatAnimation,
                       builder: (context, child) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.white
-                                    .withOpacity(_glowAnimation.value * 0.5),
-                                blurRadius: 40 * _glowAnimation.value,
-                                spreadRadius: 10 * _glowAnimation.value,
-                              ),
-                            ],
-                          ),
+                        return Transform.translate(
+                          offset: Offset(0, _floatAnimation.value),
                           child: child,
                         );
                       },
+                      child: AnimatedBuilder(
+                        animation: _glowAnimation,
+                        builder: (context, child) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.white
+                                      .withOpacity(_glowAnimation.value * 0.5),
+                                  blurRadius: 40 * _glowAnimation.value,
+                                  spreadRadius: 10 * _glowAnimation.value,
+                                ),
+                              ],
+                            ),
+                            child: child,
+                          );
+                        },
+                        child: Text(
+                          '卐',
+                          style: TextStyle(
+                            fontSize: isMobile ? 80 : (isTablet ? 100 : 130),
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            shadows: const [
+                              Shadow(
+                                blurRadius: 20.0,
+                                color: Colors.white,
+                                offset: Offset(0, 0),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: isMobile ? 32 : (isTablet ? 40 : 48)),
+
+                    // Temple Name in Hindi
+                    ShaderMask(
+                      shaderCallback: (bounds) {
+                        return const LinearGradient(
+                          colors: [Colors.white, Colors.yellow],
+                        ).createShader(bounds);
+                      },
                       child: Text(
-                        '卐',
+                        'हरिद्रा गणेश मंदिर',
                         style: TextStyle(
-                          fontSize: isMobile ? 72 : (isTablet ? 96 : 120),
-                          color: Colors.white,
+                          fontSize: isMobile ? 32 : (isTablet ? 44 : 52),
                           fontWeight: FontWeight.bold,
-                          shadows: const [
-                            Shadow(
-                              blurRadius: 20.0,
+                          color: Colors.white,
+                          fontFamily: 'NotoSansDevanagari',
+                          letterSpacing: 1.5,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+
+                    SizedBox(height: isMobile ? 12 : 16),
+
+                    Text(
+                      'HARIDRA GANESH TEMPLE',
+                      style: TextStyle(
+                        fontSize: isMobile ? 14 : (isTablet ? 20 : 24),
+                        fontWeight: FontWeight.w300,
+                        color: Colors.white.withOpacity(0.95),
+                        letterSpacing: isMobile ? 2 : 3,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+
+                    SizedBox(height: isMobile ? 20 : 24),
+
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isMobile ? 20 : 24,
+                        vertical: isMobile ? 10 : 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(25),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.6),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            color: Colors.white,
+                            size: isMobile ? 18 : 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'इंदौर, मध्य प्रदेश',
+                            style: TextStyle(
+                              fontSize: isMobile ? 15 : (isTablet ? 17 : 18),
                               color: Colors.white,
-                              offset: Offset(0, 0),
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'NotoSansDevanagari',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: isMobile ? 36 : (isTablet ? 44 : 52)),
+
+                    // Call to Action Buttons
+                    Wrap(
+                      spacing: isMobile ? 12 : 16,
+                      runSpacing: 12,
+                      alignment: WrapAlignment.center,
+                      children: [
+                        _buildGlowingButton(
+                          'पूजा बुक करें',
+                          Icons.event_available,
+                          () {},
+                          isMobile: isMobile,
+                          isTablet: isTablet,
+                        ),
+                        _buildGlowingButton(
+                          'वर्चुअल टूर',
+                          Icons.view_in_ar,
+                          () {},
+                          isPrimary: false,
+                          isMobile: isMobile,
+                          isTablet: isTablet,
+                        ),
+                      ],
+                    ),
+
+                    if (!isMobile) ...[
+                      SizedBox(height: isTablet ? 44 : 52),
+                      // Scroll Down Indicator
+                      AnimatedBuilder(
+                        animation: _floatAnimation,
+                        builder: (context, child) {
+                          return Transform.translate(
+                            offset: Offset(0, _floatAnimation.value.abs()),
+                            child: child,
+                          );
+                        },
+                        child: Column(
+                          children: [
+                            Text(
+                              'नीचे स्क्रॉल करें',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: 14,
+                                letterSpacing: 1.5,
+                                fontFamily: 'NotoSansDevanagari',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Icon(
+                              Icons.keyboard_arrow_down,
+                              color: Colors.white.withOpacity(0.9),
+                              size: 32,
                             ),
                           ],
                         ),
                       ),
-                    ),
-                  ),
-
-                  SizedBox(height: isMobile ? 24 : (isTablet ? 32 : 40)),
-
-                  // Temple Name in Hindi
-                  ShaderMask(
-                    shaderCallback: (bounds) {
-                      return const LinearGradient(
-                        colors: [Colors.white, Colors.yellow],
-                      ).createShader(bounds);
-                    },
-                    child: Text(
-                      'हरिद्रा गणेश मंदिर',
-                      style: TextStyle(
-                        fontSize: isMobile ? 28 : (isTablet ? 40 : 48),
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontFamily: 'NotoSansDevanagari',
-                        letterSpacing: 1.5,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-
-                  SizedBox(height: isMobile ? 8 : 12),
-
-                  Text(
-                    'HARIDRA GANESH TEMPLE',
-                    style: TextStyle(
-                      fontSize: isMobile ? 16 : (isTablet ? 24 : 28),
-                      fontWeight: FontWeight.w300,
-                      color: Colors.white.withOpacity(0.95),
-                      letterSpacing: 3,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-
-                  SizedBox(height: isMobile ? 16 : 20),
-
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isMobile ? 16 : 20,
-                      vertical: isMobile ? 8 : 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.6),
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.location_on,
-                          color: Colors.white,
-                          size: isMobile ? 16 : 18,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'इंदौर, मध्य प्रदेश',
-                          style: TextStyle(
-                            fontSize: isMobile ? 14 : (isTablet ? 16 : 18),
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'NotoSansDevanagari',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: isMobile ? 32 : (isTablet ? 40 : 50)),
-
-                  // Call to Action Buttons
-                  Wrap(
-                    spacing: isMobile ? 12 : 16,
-                    runSpacing: 12,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      _buildGlowingButton(
-                        'पूजा बुक करें',
-                        Icons.event_available,
-                        () {},
-                        isMobile: isMobile,
-                        isTablet: isTablet,
-                      ),
-                      _buildGlowingButton(
-                        'वर्चुअल टूर',
-                        Icons.view_in_ar,
-                        () {},
-                        isPrimary: false,
-                        isMobile: isMobile,
-                        isTablet: isTablet,
-                      ),
                     ],
-                  ),
-
-                  SizedBox(height: isMobile ? 40 : (isTablet ? 50 : 60)),
-
-                  // Scroll Down Indicator
-                  AnimatedBuilder(
-                    animation: _floatAnimation,
-                    builder: (context, child) {
-                      return Transform.translate(
-                        offset: Offset(0, _floatAnimation.value.abs()),
-                        child: child,
-                      );
-                    },
-                    child: Column(
-                      children: [
-                        Text(
-                          'नीचे स्क्रॉल करें',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
-                            fontSize: isMobile ? 12 : 14,
-                            letterSpacing: 1.5,
-                            fontFamily: 'NotoSansDevanagari',
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Icon(
-                          Icons.keyboard_arrow_down,
-                          color: Colors.white.withOpacity(0.9),
-                          size: isMobile ? 28 : 32,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -304,11 +301,11 @@ class _HeroSectionState extends State<HeroSection>
           ),
           child: ElevatedButton.icon(
             onPressed: onPressed,
-            icon: Icon(icon, size: isMobile ? 18 : 20),
+            icon: Icon(icon, size: isMobile ? 20 : 22),
             label: Text(
               text,
               style: TextStyle(
-                fontSize: isMobile ? 14 : 16,
+                fontSize: isMobile ? 15 : 17,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.5,
                 fontFamily: 'NotoSansDevanagari',
@@ -319,8 +316,8 @@ class _HeroSectionState extends State<HeroSection>
               foregroundColor:
                   isPrimary ? const Color(0xFFFF9933) : Colors.white,
               padding: EdgeInsets.symmetric(
-                horizontal: isMobile ? 20 : (isTablet ? 28 : 32),
-                vertical: isMobile ? 14 : (isTablet ? 16 : 18),
+                horizontal: isMobile ? 24 : (isTablet ? 30 : 36),
+                vertical: isMobile ? 16 : (isTablet ? 18 : 20),
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
